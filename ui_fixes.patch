@@ -1,0 +1,62 @@
+diff --git a/debian/patches/99_fix-prompt.patch b/debian/patches/99_fix-prompt.patch
+new file mode 100644
+index 0000000..0794a03
+--- /dev/null
++++ b/debian/patches/99_fix-prompt.patch
+@@ -0,0 +1,46 @@
++From: atul <atulhjp@gmail.com>
++Date: Tue Feb 2 04:09:10 2016 +0530
++Subject: fix keyring prompt
++
++    Bug 725641
++---
++ pkcs11/wrap-layer/gkm-wrap-prompt.c | 10 ++--------
++ 1 file changed, 2 insertions(+), 8 deletions(-)
++
++diff --git a/pkcs11/wrap-layer/gkm-wrap-prompt.c b/pkcs11/wrap-layer/gkm-wrap-prompt.c
++index 576cfc2..c720937 100644
++--- a/pkcs11/wrap-layer/gkm-wrap-prompt.c
+++++ b/pkcs11/wrap-layer/gkm-wrap-prompt.c
++@@ -511,16 +511,8 @@ get_unlock_options_from_prompt (GkmWrapPrompt *self, CK_ULONG_PTR n_options)
++ static void
++ set_unlock_options_on_prompt (GkmWrapPrompt *self, CK_ATTRIBUTE_PTR options, CK_ULONG n_options)
++ {
++-	gboolean chosen = FALSE;
++-	gboolean bval;
++-
++ 	g_assert (GKM_IS_WRAP_PROMPT (self));
++ 	g_assert (options || !n_options);
++-
++-	if (gkm_attributes_find_boolean (options, n_options, CKA_GNOME_TRANSIENT, &bval))
++-		chosen = bval;
++-
++-	gcr_prompt_set_choice_chosen (GCR_PROMPT (self), chosen);
++ }
++ 
++ static CK_ATTRIBUTE_PTR
++@@ -606,6 +598,7 @@ setup_unlock_keyring_other (GkmWrapPrompt *self,
++ {
++ 	GcrPrompt *prompt;
++ 	const gchar *choice;
+++	const gboolean chosen = FALSE;
++ 	gchar *text;
++ 
++ 	g_assert (GKM_IS_WRAP_PROMPT (self));
++@@ -622,6 +615,7 @@ setup_unlock_keyring_other (GkmWrapPrompt *self,
++ 	if (gkm_wrap_login_is_usable ())
++ 		choice = _("Automatically unlock this keyring whenever I’m logged in");
++ 	gcr_prompt_set_choice_label (prompt, choice);
+++	gcr_prompt_set_choice_chosen (GCR_PROMPT(self), chosen);
++ 	gcr_prompt_set_continue_label (prompt, _("Unlock"));
++ }
++ 
+diff --git a/debian/patches/series b/debian/patches/series
+index 4e83944..527b97e 100644
+--- a/debian/patches/series
++++ b/debian/patches/series
+@@ -2,4 +2,5 @@ egg-secure-memory-Allocate-enough-space-for-the-guard-poi.patch
+ egg-secure-memory-Add-a-warning-if-gnome-keyring-36-happe.patch
+ 03_kfreebsd.patch
+ 05_skip-known-test-failures.patch
++99_fix-prompt.patch
+ git_ssh_arm.patch
